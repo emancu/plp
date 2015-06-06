@@ -22,9 +22,25 @@ nonmember(Arg,[Arg|_]) :- !, fail.
 nonmember(Arg,[_|Tail]) :- !, nonmember(Arg,Tail).
 nonmember(_,[]).
 
+%%% CAMINO 3
+buscarCamino3(C) :- tablero(ej5x5,T), camino3(pos(0,0),pos(3,3),T,C).
 
+vecinoLibre3(P,T,Q,U) :-
+	vecinoLibre(P, T, Q),
+	nonmember(Q, U),
+	noHayMasCorto(Q,U),
+	length(U,L),
+	asserta(masCorto(Q,L)).
 
+noHayMasCorto(Q,U) :- masCorto(Q,D), !, X is 0, D==X.
+noHayMasCorto(Q,U) :- masCorto(Q,D), !, length(U,L), L<D.
 
+:- dynamic
+      masCorto/2.
+
+masCorto(_,D) :- D is 0.
+
+%%%
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%
@@ -122,7 +138,15 @@ camino2(_,_,_,_).
 %% desde Inicio en más de 6 pasos.
 %% Notar que dos ejecuciones de camino3/4 con los mismos argumentos deben dar los mismos resultados.
 %% En este ejercicio se permiten el uso de predicados: dynamic/1, asserta/1, assertz/1 y retractall/1.
-camino3(_,_,_,_).
+
+camino3(I,F,T,P) :- camino3(I, F, T, P, [I]), retractall(masCorto(_,_)), asserta(masCorto(_,D) :- D is 0).
+
+camino3(F,F,_T, [F], _Used).
+camino3(I,F,T, [I | Path], Used) :-
+  vecinoLibre3(I, T, Vecino,Used),
+  nonmember(Vecino, Used),
+  camino3(Vecino, F, T, Path, [Vecino | Used]).
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%
 %% Tableros simultáneos
