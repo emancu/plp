@@ -52,7 +52,7 @@ masCorto(_,D) :- D is 0.
 %% de Filas x Columnas, con todas las celdas libres.
 tablero(1,C,[L]) :- C > 0, length(L, C).
 tablero(F,C,T) :-
-  F > 0, tablero(1, C, Unario), Anterior is F - 1,
+  F > 1, tablero(1, C, Unario), Anterior is F - 1,
   tablero(Anterior, C, S), append(S, Unario, T).
 
 % TODO: Si saco el append y lo mando a la definicion,
@@ -127,8 +127,35 @@ cantidadDeCaminos(I,F,T,N) :-
 %% Una solución es mejor mientras menos pasos se deba dar para llegar a
 %% destino (distancia Manhattan). Por lo tanto, el predicado deberá devolver de a uno,
 %% todos los caminos pero en orden creciente de longitud.
-camino2(_,_,_,_).
 
+vecino2(pos(F, C), T, pos(FE, _), pos(X, C)) :- X is F - 1, posValida(pos(X, C), T), FE < F.
+vecino2(pos(F, C), T, pos(FE, _), pos(X, C)) :- X is F + 1, posValida(pos(X, C), T), FE > F.
+vecino2(pos(F, C), T, pos(_, CE), pos(F, Y)) :- Y is C - 1, posValida(pos(F, Y), T), CE < C.
+vecino2(pos(F, C), T, pos(_, CE), pos(F, Y)) :- Y is C + 1, posValida(pos(F, Y), T), CE > C.
+vecino2(pos(F, C), T, pos(_, CE), pos(F, Y)) :- Y is C - 1, posValida(pos(F, Y), T), CE = C.
+vecino2(pos(F, C), T, pos(_, CE), pos(F, Y)) :- Y is C + 1, posValida(pos(F, Y), T), CE = C.
+vecino2(pos(F, C), T, pos(FE, _), pos(X, C)) :- X is F - 1, posValida(pos(X, C), T), FE > F.
+vecino2(pos(F, C), T, pos(FE, _), pos(X, C)) :- X is F + 1, posValida(pos(X, C), T), FE < F.
+vecino2(pos(F, C), T, pos(FE, _), pos(X, C)) :- X is F - 1, posValida(pos(X, C), T), FE = F.
+vecino2(pos(F, C), T, pos(FE, _), pos(X, C)) :- X is F + 1, posValida(pos(X, C), T), FE = F.
+vecino2(pos(F, C), T, pos(_, CE), pos(F, Y)) :- Y is C - 1, posValida(pos(F, Y), T), CE > C.
+vecino2(pos(F, C), T, pos(_, CE), pos(F, Y)) :- Y is C + 1, posValida(pos(F, Y), T), CE < C.
+
+vecinoLibre2(P,T,F,Q) :- vecino2(P, T, F, Q), getPos(Q, T, Z), var(Z).
+
+
+
+camino2(I,F,T,P) :- camino2(I, F, T, P, [I]).
+
+
+camino2(F,F,_T, [F], _Used).
+camino2(I,F,T, [I | Path], Used) :-
+  vecinoLibre2(I, T, F, Vecino),
+  nonmember(Vecino, Used),
+  camino2(Vecino, F, T, Path, [Vecino | Used]).
+  
+  
+  
 %% Ejercicio 8
 %% camino3(+Inicio, +Fin, +Tablero, -Camino) ídem camino2/4 pero se espera que
 %% se reduzca drásticamente el espacio de búsqueda.
