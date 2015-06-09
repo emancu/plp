@@ -185,7 +185,7 @@ camino3(I,F,T, [I | Path], Used) :-
 %% sólo por celdas transitables de ambos tableros.
 %% Nota: Es posible una implementación que resuelva en forma inmediata casos en los que trivialmente no existe camino dual posible.
 
-caminoDual(I,F,T1,T2,P) :- T1 = T2, camino(I, F, T1, P)
+caminoDual(I,F,T1,T2,P) :- T1 = T2, camino(I, F, T1, P).
 
 
 %%%%%%%%%%% Tableros Predefinidos %%%%%%%%%%%
