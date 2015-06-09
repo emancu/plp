@@ -187,4 +187,142 @@ camino3(I,F,T, [I | Path], Used) :-
 
 caminoDual(I,F,T1,T2,P) :- T1 = T2, camino(I, F, T1, P)
 
-   
+
+%%%%%%%%%%% Tableros Predefinidos %%%%%%%%%%%
+
+tablero(ej5x5, T) :-
+  tablero(5, 5, T),
+  ocupar(pos(1, 1), T),
+  ocupar(pos(1, 2), T).
+%%| | | | | |
+%%| |O|O| | |
+%%| | | | | |
+%%| | | | | |
+
+tablero(imposible, T) :-
+  tablero(3,3,T),
+  ocupar(pos(1,0), T),
+  ocupar(pos(0,1), T),
+  ocupar(pos(1,1), T),
+  ocupar(pos(2,1), T),
+  ocupar(pos(1,2), T).
+%%| |O| |
+%%|O|O|O|
+%%| |O| |
+
+tablero(dual1, T) :-
+  tablero(4,4,T),
+  ocupar(pos(0,3), T),
+  ocupar(pos(1,2), T),
+  ocupar(pos(2,0), T),
+  ocupar(pos(3,1), T),
+  ocupar(pos(3,2), T).
+%%| | | |O|
+%%| | |O| |
+%%|O| | | |
+%%| |O|O| |
+
+tablero(dual2, T) :-
+  tablero(4,4,T),
+  ocupar(pos(0,1), T).
+%%| |O| | |
+%%| | | | |
+%%| | | | |
+%%| | | | |
+
+tablero(libre3x3, T) :- tablero(3, 3, T).
+tablero(libre20, T) :- tablero(20, 20, T).
+
+%%%%%%%%%%% Tests %%%%%%%%%%%
+tests :- forall(between(1, 16, N), test(N)).
+
+% Test vecino
+test(1) :-
+  tablero(imposible, T), !,
+  vecino(pos(0,0),T,pos(1,0)),
+  vecino(pos(0,0),T,pos(0,1)),
+  not(vecino(pos(0,0),T,pos(1,1))),
+  not(vecino(pos(0,0),T,pos(-1,0))),
+  not(vecino(pos(0,0),T,pos(0,-1))).
+
+% Test vecinoLibre
+test(2) :-
+  tablero(imposible, T), !,
+  not(vecinoLibre(pos(0,0),T,pos(1,0))),
+  not(vecinoLibre(pos(0,0),T,pos(0,1))).
+
+test(3) :-
+  tablero(libre3x3, T), !,
+  vecinoLibre(pos(1,1), T, pos(0,1)),
+  vecinoLibre(pos(1,1), T, pos(1,0)),
+  vecinoLibre(pos(1,1), T, pos(1,2)),
+  vecinoLibre(pos(1,1), T, pos(2,1)).
+
+% Test camino
+test(4) :-
+  tablero(libre3x3, T), !,
+  camino(pos(0,0), pos(2,2),T,C),
+  C = [pos(0, 0), pos(1, 0), pos(2, 0), pos(2,1), pos(1,1), pos(0,1), pos(0,2), pos(1,2), pos(2,2)].
+
+test(5) :-
+  tablero(libre3x3, T), !,
+  camino(pos(0,0), pos(2,2),T,C),
+  C = [pos(0, 0), pos(1, 0), pos(1, 1), pos(2,1), pos(2,2)].
+
+% Test cantidadDeCaminos
+test(6) :-
+  tablero(ej5x5, T), !,
+  cantidadDeCaminos(pos(0,0), pos(2,3), T, 287).
+
+test(7) :-
+  tablero(imposible, T), !,
+  cantidadDeCaminos(pos(0,0), pos(2,2), T, 0).
+
+% Test camino2
+test(8) :-
+  tablero(ej5x5, T), !,
+  camino2(pos(0,0), pos(2,3), T, P),
+  P = [pos(0, 0), pos(1, 0), pos(2, 0), pos(2, 1), pos(2, 2), pos(2, 3)].
+
+test(9) :-
+  tablero(ej5x5, T), !,
+  camino2(pos(0,0), pos(2,3), T, P),
+  length(P, 8).
+
+test(10) :-
+  tablero(ej5x5, T), !,
+  findall(P, camino2(pos(0,0),pos(2,3),T,P), L),
+  length(L, 287).
+
+test(11) :-
+  tablero(libre3x3, T), !,
+  camino2(pos(0,0), pos(2,2),T,C),
+  C = [pos(0, 0), pos(1, 0), pos(1, 1), pos(2,1), pos(2,2)].
+
+% Test camino3
+test(12) :-
+  tablero(ej5x5, T), !,
+  camino3(pos(0,0), pos(2,3), T, P),
+  P = [pos(0, 0), pos(1, 0), pos(2, 0), pos(2, 1), pos(2, 2), pos(2, 3)].
+
+test(13) :-
+  tablero(ej5x5, T), !,
+  camino3(pos(0,0), pos(2,3), T, P),
+  length(P, N),
+  not(N > 6).
+
+test(14) :-
+  tablero(ej5x5, T), !,
+  findall(P, camino3(pos(0,0),pos(2,3),T,P), L),
+  length(L, 2).
+
+test(15) :-
+  tablero(libre3x3, T), !,
+  camino3(pos(0,0), pos(2,2),T,C),
+  C = [pos(0, 0), pos(1, 0), pos(1, 1), pos(2,1), pos(2,2)].
+
+% Test caminoDual
+test(16) :-
+  tablero(dual1, T1), tablero(dual2,T2), !,
+  caminoDual(pos(0,0),pos(1,3),T1,T2,P),
+  P = [pos(0, 0), pos(1, 0), pos(1, 1), pos(2, 1), pos(2, 2), pos(2, 3), pos(1, 3)].
