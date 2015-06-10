@@ -12,6 +12,14 @@ posValida(pos(X,Y), T) :-
 getPos(pos(X, Y), T, Value) :-
   posValida(pos(X, Y), T), nth0(X, T, L), nth0(Y, L, Value), !.
 
+%% boardSize(+T, -N) sera verdadero cuando N sea la cantidad
+%% de filas por columnas del tablero.
+boardSize(T, N) :-
+  length(T, F),
+  nth0(0, T, Row),
+  length(Row, C),
+  N is F*C.
+
 %% nonmember(+Element, +List) check that Element is not a member of List.
 nonmember(Arg,[Arg|_]) :- !, fail.
 nonmember(Arg,[_|Tail]) :- !, nonmember(Arg,Tail).
@@ -29,7 +37,7 @@ tablero(0,_,[]).
 tablero(F,C,[L|T]) :-
   length(L, C),
   Anterior is F - 1,
-  tablero(Anterior, C, T).
+  tablero(Anterior, C, T), !.
 
 
 %% Ejercicio 2
@@ -115,6 +123,13 @@ vecino2(pos(F, C), pos(FE, _), T, pos(X, C)) :- X is F - 1, posValida(pos(X, C),
 vecino2(pos(F, C), pos(FE, _), T, pos(X, C)) :- X is F + 1, posValida(pos(X, C), T), FE = F.
 vecino2(pos(F, C), pos(_, CE), T, pos(F, Y)) :- Y is C - 1, posValida(pos(F, Y), T), CE > C.
 vecino2(pos(F, C), pos(_, CE), T, pos(F, Y)) :- Y is C + 1, posValida(pos(F, Y), T), CE < C.
+
+%% Calcular todos los caminos de distancia 0.. F*C ir dandolos en orden.
+camino2_alternativo(I,F,T,P) :-
+  boardSize(T, BoardSize),
+  between(1, BoardSize, Length),
+  length(P, Length),
+  camino(I,F,T,P).
 
 
 %% Ejercicio 8
