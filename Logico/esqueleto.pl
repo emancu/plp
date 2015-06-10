@@ -142,16 +142,29 @@ camino2_alternativo(I,F,T,P) :-
 %% Notar que dos ejecuciones de camino3/4 con los mismos argumentos deben dar los mismos resultados.
 %% En este ejercicio se permiten el uso de predicados: dynamic/1, asserta/1, assertz/1 y retractall/1.
 
+%% Hace retractall(masCorto(_,_)) para borrar de la base de conocimiento, todo lo agregado en ejecuciones previas.
+%% asserta(masCorto(_,0)) es para que las posiciones que no tengan un camino parcial calculado, nos den 0.
+
 camino3(I,F,T,P) :-
   retractall(masCorto(_,_)),
   asserta(masCorto(_,0)),
   camino3(I, F, T, P, [I]).
 
+%% camino3(+Inicio,+Fin,+Tablero,-Camino,+Usados)
 camino3(F,F,_T, [F], _Used) :- !.
 camino3(I,F,T, [I | Path], Used) :-
   vecinoLibre3(I,F,T,Vecino,Used),
   camino3(Vecino, F, T, Path, [Vecino | Used]).
 
+
+
+%% Obtiene los vecinos libres, que no hayan sido recorridos, y para los cuales no se haya 
+%% encontrado un camino mas corto que el camino parcial en ese momento.
+%% Para el vecino a ser utilizado en el camino, se agrega a la base de conocimiento la clausula,
+%% masCorto(Vecino,L):-!, donde L es la distancia parcial hasta la posicion Vecino.
+%% Se utiliza asserta, para que esta clausula este encima de las definidas previamente, y se agrega
+%% el cut (!), para evitar que se evaluen las reglas masCorto definidas previamente para este Vecino.
+%% vecinoLibre3(+Inicio,+Fin,+Tablero,-Vecino,+Usados)
 vecinoLibre3(I,F,T,Vecino,Used) :-
   vecinoLibre2(I,F,T,Vecino),
   nonmember(Vecino, Used),
@@ -159,9 +172,15 @@ vecinoLibre3(I,F,T,Vecino,Used) :-
   length(Used,L),
   asserta(masCorto(Vecino,L):-!).
 
+%% Es evaluado como True, si el camino parcial U, es menor que el camino calculado anteriormente (segunda clausula).
+%% Si no se hubiera calculado un camino anterior, tambien se devuelve True (primera clausula).
+%% noHayMasCorto(+Posicion,+Usados)
 noHayMasCorto(Q,_U) :- masCorto(Q,D), X is 0, D==X, !.
 noHayMasCorto(Q,U) :- masCorto(Q,D), length(U,L), L=<D, !.
 
+%% Obtiene la distancia mas corta calculada hasta el momento, desde la posicion de Inicio de camino3 hasta la Posicion.
+%% Si no hubiese una distancia calculada, Distancia sera 0. (Esta clausula es agregada con un asserta/2 en camino3).
+%% masCorto(+Posicion,-Distancia)
 :- dynamic
   masCorto/2.
 
