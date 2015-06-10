@@ -147,24 +147,27 @@ camino3(I,F,T,P) :-
   asserta(masCorto(_,D) :- D is 0),
   camino3(I, F, T, P, [I]).
 
-camino3(F,F,_T, [F], _Used).
+camino3(F,F,_T, [F], _Used) :- !.
 camino3(I,F,T, [I | Path], Used) :-
+  
   vecinoLibre3(I,F,T,Vecino,Used),
-  nonmember(Vecino, Used),
+  
   camino3(Vecino, F, T, Path, [Vecino | Used]).
 
 %% BORRAME
-buscarCamino3(C) :- tablero(ej5x5,T), camino3(pos(0,0),pos(3,3),T,C).
+buscarCamino3(C) :- tablero(ej5x5,T),  camino3(pos(0,0),pos(3,3),T,C).
 
-vecinoLibre3(I,F,T,Q,Used) :-
-  vecinoLibre2(I,F,T,Q),
-  nonmember(Q, Used),
-  noHayMasCorto(Q,Used),
+vecinoLibre3(I,F,T,Vecino,Used) :-
+  
+  vecinoLibre2(I,F,T,Vecino),
+  nonmember(Vecino, Used),
+  
+  noHayMasCorto(Vecino,Used),
   length(Used,L),
-  asserta(masCorto(Q,L)).
+  asserta(masCorto(Vecino,L):-!).
 
-noHayMasCorto(Q,_U) :- masCorto(Q,D), !, X is 0, D==X.
-noHayMasCorto(Q,U) :- masCorto(Q,D), !, length(U,L), L<D.
+noHayMasCorto(Q,_U) :- masCorto(Q,D), X is 0, D==X, !.
+noHayMasCorto(Q,U) :- masCorto(Q,D), length(U,L), L=<D, !.
 
 :- dynamic
   masCorto/2.
